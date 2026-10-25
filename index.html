@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16202c">
+<title>Смета монтажника</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#f2f4f7;--card:#fff;--ink:#16202c;--muted:#6b7684;--line:#e3e7ec;--accent:#f5a623;--accent-ink:#1c1300;--head:#16202c;--head-ink:#fff;--danger:#d64545;--field:#f7f8fa}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141a;--card:#1a222c;--ink:#e8edf2;--muted:#94a0ad;--line:#2a3542;--head:#0a0e13;--field:#121920}}
+:root[data-theme="dark"]{--bg:#0f141a;--card:#1a222c;--ink:#e8edf2;--muted:#94a0ad;--line:#2a3542;--head:#0a0e13;--field:#121920}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--head);color:var(--head-ink);padding:calc(10px + env(safe-area-inset-top)) 16px 12px}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+.total{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.total small{font-size:20px;font-weight:600;opacity:.8}
+.menu{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:8px 12px;font-size:15px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.btn{border:0;border-radius:12px;padding:13px 10px;font-weight:700;font-size:15px;cursor:pointer}
+.btn.pri{background:var(--accent);color:var(--accent-ink)}
+.btn.sec{background:rgba(255,255,255,.12);color:#fff}
+.btn.full{width:100%}
+.btn.dark{background:var(--ink);color:var(--bg)}
+.btn:disabled{opacity:.4}
+main{padding:12px 16px 120px;max-width:640px;margin:0 auto}
+.meta{display:grid;grid-template-columns:150px 1fr;gap:8px;align-items:center;margin-bottom:10px;color:var(--muted);font-size:14px}
+.meta input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.empty{text-align:center;color:var(--muted);padding:48px 12px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
+.rname{font-size:14px;line-height:1.3;display:flex;gap:8px;justify-content:space-between}
+.rname span{flex:1}
+.del{background:none;border:0;color:var(--muted);font-size:20px;line-height:1;padding:0 2px}
+.rnote{font-size:12px;color:var(--muted);margin-top:2px}
+.rctl{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:end;margin-top:10px}
+.f label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--field)}
+.qty button{width:40px;height:42px;border:0;background:none;font-size:22px;font-weight:600}
+.qty input{width:58px;height:42px;border:0;background:none;text-align:center;font-weight:700;font-size:17px}
+.price{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--field);font-variant-numeric:tabular-nums}
+.price[readonly]{border-style:dashed;color:var(--muted)}
+.price.ed{border-color:var(--accent);background:transparent}
+.sum{font-weight:800;font-size:18px;text-align:right;font-variant-numeric:tabular-nums;min-width:86px;padding-bottom:10px}
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%);z-index:4}
+.savebar .btn{max-width:608px;margin:0 auto;display:block;width:100%;padding:16px;font-size:17px}
+/* sheets */
+.sheet{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;background:var(--bg)}
+.sheet.open{display:flex}
+.shead{background:var(--head);color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:10px}
+.shead h2{margin:0;font-size:18px;flex:1}
+.x{background:none;border:0;color:#fff;font-size:26px;line-height:1;padding:4px 8px}
+.search{margin:12px 16px 4px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card)}
+.sbody{overflow:auto;flex:1;padding:4px 16px 24px}
+.cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px}
+.pi{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:6px;cursor:pointer}
+.pi span{flex:1;font-size:14px}
+.pi b{white-space:nowrap;font-variant-numeric:tabular-nums}
+.pi .tag{font-size:10px;font-weight:700;color:var(--accent);display:block;text-transform:uppercase;letter-spacing:.04em}
+.pi.added{border-color:var(--accent)}
+.est{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.est .t{display:flex;justify-content:space-between;font-weight:700}
+.est .s{font-size:13px;color:var(--muted);margin-top:4px}
+.est.cur{border-color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;z-index:20;pointer-events:none}
+.toast.show{opacity:1}
+.danger{color:var(--danger);background:none;border:0;padding:12px;font-weight:600;width:100%}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div><div class="lbl" id="tlbl">Итого по смете</div><div class="total" id="total">0 <small>₽</small></div></div>
+    <button class="menu" id="openList">Сметы <span id="cnt"></span></button>
+  </div>
+  <div class="actions">
+    <button class="btn sec" id="newEst">+ Новая смета</button>
+    <button class="btn pri" id="addPos">+ Позиция</button>
+  </div>
+</header>
+
+<main id="page"></main>
+
+<div class="savebar"><button class="btn dark" id="save">Сохранить смету</button></div>
+
+<div class="sheet" id="priceSheet">
+  <div class="shead"><h2>Прайс</h2><button class="x" data-close>×</button></div>
+  <input class="search" id="q" type="search" placeholder="Поиск: камера, датчик, кабель…">
+  <div class="sbody" id="plist"></div>
+</div>
+
+<div class="sheet" id="listSheet">
+  <div class="shead"><h2>Сохранённые сметы</h2><button class="x" data-close>×</button></div>
+  <div class="sbody" id="elist"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PRICE = [{"c": "Ремонт-обследование", "items": [{"id": 1, "n": "Обследование для последующего подсчета КП (составление схемы с габаритными размерами, поиск вариантов прокладки линий, мест размещения оборудования, подсчет кол-ва кабеля и расходников)   (!при выгоревшем объекте!)", "p": 1200, "e": false}, {"id": 2, "n": "Выезд и диагностика неисправности без дополнительного вмешательства", "p": 1200, "e": false}, {"id": 3, "n": "Выезд и диагностика неисправности, включая решение проблемы (замена БП, штекера, розетки, обжим кабеля, пайка и.т.п.)", "p": 1750, "e": false}, {"id": 4, "n": "Обследование с вмешательством в систему клиента, проверка кабеля и оборудования в скрытых конструкциях, прозвон кабелей и.т.п.", "p": 1000, "e": true, "r": "1000-1750"}]}, {"c": "Видеонаблюдение", "items": [{"id": 5, "n": "Монтаж камеры внутренней (с монтажом коробки/кронштейна, обжим так же и ниже)", "p": 1450, "e": false}, {"id": 6, "n": "Монтаж камеры уличной (высота до 5м)", "p": 1900, "e": false}, {"id": 7, "n": "Монтаж камеры уличной (высота от 5м до 7м)", "p": 2700, "e": false}, {"id": 8, "n": "Монтаж камеры уличной (высота от 7м до 15м)", "p": 4500, "e": false}, {"id": 9, "n": "Монтаж, сборка с HDD и подключение видеорегистратора (в том числе с крепежом на стену/ящик/стойку)", "p": 500, "e": false}, {"id": 10, "n": "Монтаж и подключение видеорегистратора DVR на 4,8,16,32", "p": 70, "e": true}, {"id": 11, "n": "Монтаж и подключение видеорегистратора NVR на 4,8,16,32", "p": 50, "e": true}]}, {"c": "Сеть", "items": [{"id": 12, "n": "Сборка и монтаж шкафа СКС настенный до 15U", "p": 1400, "e": false}, {"id": 13, "n": "Сборка и монтаж шкафа СКС напольный до 15U", "p": 1000, "e": false}, {"id": 14, "n": "Монтаж в СКС шкаф патч-панелей/блока розеток/полки/коммутатора/прочего", "p": 350, "e": false}, {"id": 15, "n": "Монтаж ББП в стойку (реально тяжелый)", "p": 700, "e": false}, {"id": 16, "n": "Монтаж коммутатора/роутера (крепеж на стену/в ящик/в серверный шкаф (не на полку))", "p": 500, "e": false}, {"id": 17, "n": "Настройка роутера+модема/точки доступа", "p": 500, "e": false}, {"id": 18, "n": "Монтаж интернет розетки", "p": 400, "e": false}, {"id": 19, "n": "Обжим/расшивка патч-панели/коммутатора/сетевого устройства (много портов)", "p": 50, "e": true, "r": "50/порт"}]}, {"c": "Установка дополнительного оборудования", "items": [{"id": 20, "n": "Монтаж бесперебойного блока питания (от формата под АКБ 0-12Ач/17Ач/26Ач/более, несколько АКБ - суммируй емкость)", "p": 500, "e": true, "r": "500/600/800/1000"}, {"id": 21, "n": "Монтаж ящика/корпуса с монтажной панелью (по ГОСТу: сборка ящика -если требуется красота в ящике, маркировка кабеля, уложенные провода на стяжка и площадках)", "p": 500, "e": true, "r": "500(1000 - 1 коммутатор (8портов) если по ГОСТу)"}, {"id": 22, "n": "Подключение к имеющемуся (установленному) оборудованию замок/БП/считыватель/прочее", "p": 300, "e": false}, {"id": 23, "n": "Монтаж микрофона", "p": 400, "e": false}, {"id": 24, "n": "Монтаж монитора на кронштейне", "p": 500, "e": false}, {"id": 25, "n": "Монтаж электрической розетки, удлинителя, замена, ремонт", "p": 300, "e": false}, {"id": 26, "n": "Монтаж LED-светильника, прожектора", "p": 350, "e": false}]}, {"c": "Прокладка кабельных линий/строительные работы", "items": [{"id": 27, "n": "Прокладка кабеля открытым способом/в кабель-канале/гофра-трубе диаметром до 32мм", "p": 35, "e": true}, {"id": 28, "n": "Прокладка кабеля открытым способом/в кабель-канале/гофра-трубе диаметром до 32мм на высоте более 5м", "p": 50, "e": true}, {"id": 29, "n": "Монтаж гофра-трубы крепеж каждые 40см", "p": 15, "e": true}, {"id": 30, "n": "Монтаж металлорукава", "p": 25, "e": true}, {"id": 31, "n": "Монтаж кабель-канала/трубы + трубы ПНД", "p": 20, "e": true}, {"id": 32, "n": "Пайка (все жилы кабеля UTP/КВК/прочее)", "p": 350, "e": false}]}, {"c": "Электротехнические работы", "items": [{"id": 33, "n": "Прокладка кабеля ВВГ 3х1.5, 3х2.5", "p": 50, "e": true}, {"id": 34, "n": "Монтаж автомата однополюсного, в том числе с одинарным боксом", "p": 250, "e": false}, {"id": 35, "n": "Монтаж автомата двухполюсного", "p": 250, "e": false}, {"id": 36, "n": "Установка щитка накладного 1рядного + прибавляем монтаж автоматов", "p": 450, "e": false}, {"id": 37, "n": "Установка щитка встраиваемого 1рядного + прибавляем монтаж автоматов", "p": 600, "e": false}, {"id": 38, "n": "Установка розетки накладной", "p": 250, "e": false}, {"id": 39, "n": "Установка розетки врезной", "p": 250, "e": false}, {"id": 40, "n": "Установка электрощита до 12/24/36/48 автоматов", "p": 500, "e": true, "r": "500/650/900/1200"}, {"id": 41, "n": "Штробление пенобетон", "p": 120, "e": true}, {"id": 42, "n": "Штробление кирпич", "p": 180, "e": true}, {"id": 43, "n": "Штробление монолит", "p": 230, "e": true}, {"id": 44, "n": "Сверление подрозетника пенобетон", "p": 150, "e": false}, {"id": 45, "n": "Сверление подрозетника кирпич", "p": 200, "e": false}, {"id": 46, "n": "Сверление подрозетника монолит", "p": 250, "e": false}, {"id": 47, "n": "Установка стакана в подрозетник", "p": 80, "e": false}, {"id": 48, "n": "Расключение коробки распаячной", "p": 0, "e": true, "r": "нет цены"}, {"id": 49, "n": "подключение к 220", "p": 250, "e": false}]}, {"c": "Физический сложные работы", "items": [{"id": 50, "n": "Бурение перфоратором проходных отверстий от 150мм до 1000мм (до 16мм)", "p": 100, "e": false}, {"id": 51, "n": "Бурение перфоратором проходных отверстий от 150мм до 1000мм (от 16 до 20мм)", "p": 160, "e": false}, {"id": 52, "n": "Бурение перфоратором проходных отверстий от 150мм до 1000мм (более 20мм до 32 включительно)", "p": 300, "e": false}, {"id": 53, "n": "Алмазное сверление 25Д 1см стены кирпич/бетон/высокоармированный бетон", "p": 0, "e": true, "r": "нет цены"}, {"id": 54, "n": "Алмазное сверление 150Д 1см стены кирпич/бетон/высокоармированный бетон", "p": 0, "e": true, "r": "нет цены"}, {"id": 55, "n": "Копание песок, щебень на 1штык (разгрести и заложить трубу, гофру)", "p": 250, "e": true}, {"id": 56, "n": "Копание земля/глина на 1штык", "p": 350, "e": true}]}, {"c": "Охранно-пожарная сигнализация", "items": [{"id": 57, "n": "Монтаж радиоканального датчика, сирены, клавиатуры", "p": 350, "e": false}, {"id": 58, "n": "Монтаж беспроводного хаба-охранного прибора (с настройкой)", "p": 1000, "e": false}, {"id": 59, "n": "Монтаж проводного датчика охранно-пожарного, сирены, таблички, пульта контроля, ТМ, клавиатуры, тревожной кнопки и прочего", "p": 400, "e": false}, {"id": 60, "n": "Монтаж сирены уличной", "p": 500, "e": false}, {"id": 61, "n": "Монтаж пожарного дымового линейного датчика (высотой до 4х метров)", "p": 500, "e": false}, {"id": 62, "n": "Монтаж пожарного дымового линейного датчика (высотой более 4х метров)", "p": 750, "e": false}, {"id": 63, "n": "Монтаж прибора ОС/ПС на 1 — 16 шлейфа, подключение 220 Вольт", "p": 500, "e": false}, {"id": 64, "n": "ПНР охранно/пожарного прибора", "p": 1000, "e": false}]}, {"c": "ПОЖАРКА как таковая и Болид адресный-аналоговый (охранка в том числе)", "items": [{"id": 65, "n": "Прокладка кабеля в кабель-канале/гофра-трубе диаметром до 32мм", "p": 40, "e": true}, {"id": 66, "n": "Прокладка кабеля в кабель-канале/гофра-трубе диаметром до 32мм на высоте более 5м", "p": 55, "e": true}, {"id": 67, "n": "Сириус ППК", "p": 1700, "e": false}, {"id": 68, "n": "С2000-КДЛ-С в прибор", "p": 300, "e": false}, {"id": 69, "n": "Датчики-точки С2000-АР2, УК-ВК, БРИЗ (отдельный), ДИП, ИПР, сирены, табло", "p": 400, "e": false}, {"id": 70, "n": "МПН пайка", "p": 400, "e": false}, {"id": 71, "n": "Приборы-модули МИП-2, Сигнал-10, БКИ", "p": 800, "e": false}, {"id": 72, "n": "Стабилизатор переменного напряжения СКм-3000-1", "p": 1000, "e": false}, {"id": 73, "n": "Монтаж теплового кабеля ИП-104-Гранат GTSW-88 до 5и метров высота прокладки", "p": 40, "e": true}]}, {"c": "Монтаж СКУД", "items": [{"id": 74, "n": "Монтаж считывателя, кнопки выхода", "p": 500, "e": false}, {"id": 75, "n": "Монтаж вызывной панели накладной монтаж дерево и пластик/метал бетон и кирпич/врезной монтаж (штробление)", "p": 1500, "e": true, "r": "1500/1700/2000"}, {"id": 76, "n": "Монтаж домофона", "p": 1500, "e": false}, {"id": 77, "n": "Монтаж и настройка автономного контроллера (кодонаборной панели) (с программированием контроллера и ключей)", "p": 850, "e": false}, {"id": 78, "n": "Монтаж накладного электромагнитного/механического замка (сварка+резка = дороже). дерево и пластик/металл и нюансы", "p": 1250, "e": true, "r": "1250/1600"}, {"id": 79, "n": "Монтаж доводчика дерево и пластик/металл и нюансы", "p": 1100, "e": true, "r": "1100/1300"}]}, {"c": "Демонтаж", "items": [{"id": 80, "n": "Кабельной линии (жгута в гофре, с кабель-каналом, открытого с сохранением целостности кабеля, с демонтажем клипс)", "p": 12, "e": true}, {"id": 81, "n": "Камера видеонаблюдения внутренняя (с демонтажем коробки/кронштейна так же и ниже)", "p": 250, "e": false}, {"id": 82, "n": "Камера видеонаблюдения уличная (высота до 5м)", "p": 350, "e": false}, {"id": 83, "n": "Камера видеонаблюдения уличная (высота от 5м до 7м)", "p": 500, "e": false}, {"id": 84, "n": "Камера видеонаблюдения уличная (высота от 7м до 15м, в том числе на вышке/подъемнике)", "p": 3000, "e": false}, {"id": 85, "n": "Датчик, клавиатура, считыватель, УСС, кнопки, сирены, таблички и прочее", "p": 150, "e": false}, {"id": 86, "n": "Замок, доводчик, вызывная панель, домофон (с сохранением всех частей и крепежа)", "p": 300, "e": false}, {"id": 87, "n": "Прибор ОС/ПС, блок питания, сетевые контроллеры, коммутаторы, мониторы, видеорегистраторы (закрепленные)", "p": 300, "e": false}, {"id": 88, "n": "Шкафа СКС настенного/напольного с разборкой 15U", "p": 600, "e": false}]}];
+const ITEMS = {}; PRICE.forEach(c=>c.items.forEach(i=>{i.cat=c.c;ITEMS[i.id]=i}));
+
+const LS_EST='smeta.estimates', LS_DRAFT='smeta.draft';
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const $=s=>document.querySelector(s);
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtDate=d=>{const [y,m,dd]=d.split('-');return `${dd}.${m}.${y}`};
+
+let estimates=ls.get(LS_EST,[]);
+let cur=ls.get(LS_DRAFT,null)||blank();
+let dirty=false;
+
+function blank(){return {id:null,date:today(),title:'',rows:[]}}
+function totalOf(e){return e.rows.reduce((s,r)=>s+(+r.qty||0)*(+r.price||0),0)}
+function persistDraft(){ls.set(LS_DRAFT,cur)}
+
+function renderHeader(){
+  $('#total').innerHTML=fmt(totalOf(cur))+' <small>₽</small>';
+  $('#tlbl').textContent=cur.id?'Итого · смета от '+fmtDate(cur.date):'Итого по новой смете';
+  $('#cnt').textContent=estimates.length?`(${estimates.length})`:'';
+}
+
+function render(){
+  const p=$('#page');
+  let h=`<div class="meta"><input type="date" id="date" value="${cur.date}"><input id="title" placeholder="Объект / адрес (необязательно)" value="${esc(cur.title||'')}"></div>`;
+  if(!cur.rows.length){
+    h+=`<div class="empty">Смета пустая.<br>Нажмите <b>«+ Позиция»</b> и выберите работу из прайса.</div>`;
+  }
+  cur.rows.forEach((r,ix)=>{
+    const it=ITEMS[r.itemId]||{n:r.name,e:true};
+    h+=`<div class="row" data-ix="${ix}">
+      <div class="rname"><span>${esc(r.name)}</span><button class="del" data-del="${ix}" aria-label="Удалить">×</button></div>
+      ${it.r?`<div class="rnote">В прайсе: ${esc(it.r)}</div>`:''}
+      <div class="rctl">
+        <div class="f"><label>Кол-во</label><div class="qty"><button data-dec="${ix}">−</button><input inputmode="decimal" data-qty="${ix}" value="${r.qty}"><button data-inc="${ix}">+</button></div></div>
+        <div class="f"><label>Цена${it.e?' · ред.':' за шт'}</label><input class="price ${it.e?'ed':''}" inputmode="decimal" data-price="${ix}" value="${r.price}" ${it.e?'':'readonly'}></div>
+        <div class="sum" id="sum${ix}">${fmt(r.qty*r.price)} ₽</div>
+      </div></div>`;
+  });
+  if(cur.id)h+=`<button class="danger" id="delEst">Удалить эту смету</button>`;
+  p.innerHTML=h;
+  $('#save').disabled=!cur.rows.length;
+  renderHeader();
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function num(v){v=parseFloat(String(v).replace(',','.'));return isFinite(v)&&v>=0?v:0}
+
+function updRow(ix){
+  const r=cur.rows[ix];
+  const s=document.getElementById('sum'+ix); if(s) s.textContent=fmt(r.qty*r.price)+' ₽';
+  dirty=true; persistDraft(); renderHeader();
+}
+
+$('#page').addEventListener('click',e=>{
+  const t=e.target;
+  if(t.dataset.inc!==undefined||t.dataset.dec!==undefined){
+    const ix=+(t.dataset.inc??t.dataset.dec), r=cur.rows[ix];
+    r.qty=Math.max(0,num(r.qty)+(t.dataset.inc!==undefined?1:-1));
+    document.querySelector(`[data-qty="${ix}"]`).value=r.qty; updRow(ix);
+  }
+  if(t.dataset.del!==undefined){cur.rows.splice(+t.dataset.del,1);dirty=true;persistDraft();render()}
+});
+$('#page').addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.qty!==undefined){cur.rows[+t.dataset.qty].qty=num(t.value);updRow(+t.dataset.qty)}
+  if(t.dataset.price!==undefined){cur.rows[+t.dataset.price].price=num(t.value);updRow(+t.dataset.price)}
+  if(t.id==='date'){cur.date=t.value||today();persistDraft();renderHeader()}
+  if(t.id==='title'){cur.title=t.value;persistDraft()}
+});
+$('#page').addEventListener('focusin',e=>{if(e.target.matches('[data-qty],.price.ed'))e.target.select()});
+
+/* price sheet */
+function renderPrice(q=''){
+  q=q.trim().toLowerCase();
+  const inEst=new Set(cur.rows.map(r=>r.itemId));
+  let h='';
+  PRICE.forEach(c=>{
+    const its=c.items.filter(i=>!q||i.n.toLowerCase().includes(q)||c.c.toLowerCase().includes(q));
+    if(!its.length)return;
+    h+=`<div class="cat">${esc(c.c)}</div>`;
+    its.forEach(i=>h+=`<button class="pi ${inEst.has(i.id)?'added':''}" data-add="${i.id}"><span>${esc(i.n)}${i.e?'<em class="tag">цену можно изменить</em>':''}</span><b>${i.r?esc(i.r.length>14?i.p+'…':i.r):fmt(i.p)} ₽</b></button>`);
+  });
+  $('#plist').innerHTML=h||'<div class="empty">Ничего не найдено</div>';
+}
+$('#addPos').onclick=()=>{$('#q').value='';renderPrice();open('#priceSheet')};
+$('#q').oninput=e=>renderPrice(e.target.value);
+$('#plist').onclick=e=>{
+  const b=e.target.closest('[data-add]'); if(!b)return;
+  const it=ITEMS[b.dataset.add];
+  const ex=cur.rows.find(r=>r.itemId===it.id);
+  if(ex){ex.qty=num(ex.qty)+1;toast(`+1 · ${short(it.n)} (${ex.qty})`)}
+  else{cur.rows.push({itemId:it.id,name:it.n,qty:1,price:it.p});toast('Добавлено: '+short(it.n))}
+  b.classList.add('added'); dirty=true; persistDraft(); render();
+};
+function short(s){return s.length>34?s.slice(0,32)+'…':s}
+
+/* estimates list */
+function renderList(){
+  if(!estimates.length){$('#elist').innerHTML='<div class="empty">Пока нет сохранённых смет</div>';return}
+  const sorted=[...estimates].sort((a,b)=>b.date.localeCompare(a.date)||b.saved-a.saved);
+  const all=estimates.reduce((s,e)=>s+totalOf(e),0);
+  $('#elist').innerHTML=`<div class="cat">Всего по сметам: ${fmt(all)} ₽</div>`+sorted.map(e=>`
+    <button class="est ${e.id===cur.id?'cur':''}" data-open="${e.id}">
+      <div class="t"><span>${fmtDate(e.date)}${e.title?' · '+esc(e.title):''}</span><span>${fmt(totalOf(e))} ₽</span></div>
+      <div class="s">${e.rows.length} поз.: ${esc(e.rows.slice(0,3).map(r=>short(r.name)+' × '+r.qty).join('; '))}${e.rows.length>3?'…':''}</div>
+    </button>`).join('');
+}
+$('#openList').onclick=()=>{renderList();open('#listSheet')};
+$('#elist').onclick=e=>{
+  const b=e.target.closest('[data-open]'); if(!b)return;
+  if(dirty&&cur.rows.length&&!confirmLeave())return;
+  cur=JSON.parse(JSON.stringify(estimates.find(x=>x.id===b.dataset.open)));
+  dirty=false; persistDraft(); render(); close();
+};
+$('#page').addEventListener('click',e=>{
+  if(e.target.id!=='delEst')return;
+  if(!confirm('Удалить смету от '+fmtDate(cur.date)+'?'))return;
+  estimates=estimates.filter(x=>x.id!==cur.id); ls.set(LS_EST,estimates);
+  cur=blank(); dirty=false; persistDraft(); render(); toast('Смета удалена');
+});
+
+$('#newEst').onclick=()=>{
+  if(dirty&&cur.rows.length&&!confirmLeave())return;
+  cur=blank(); dirty=false; persistDraft(); render(); toast('Новая смета');
+};
+function confirmLeave(){return confirm('В текущей смете есть несохранённые изменения. Продолжить без сохранения?')}
+
+$('#save').onclick=()=>{
+  cur.rows=cur.rows.filter(r=>num(r.qty)>0);
+  if(!cur.rows.length){render();return}
+  cur.saved=Date.now();
+  if(!cur.id){cur.id=String(Date.now());estimates.push(JSON.parse(JSON.stringify(cur)))}
+  else{const i=estimates.findIndex(x=>x.id===cur.id);estimates[i]=JSON.parse(JSON.stringify(cur))}
+  ls.set(LS_EST,estimates);
+  toast(`Сохранено: ${fmt(totalOf(cur))} ₽`);
+  cur=blank(); dirty=false; persistDraft(); render();
+};
+
+function open(s){$(s).classList.add('open')}
+function close(){document.querySelectorAll('.sheet.open').forEach(x=>x.classList.remove('open'))}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1600)}
+
+render();
+if('serviceWorker' in navigator && location.protocol==='https:'){try{navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}}
+</script>
+</body>
+</html>
